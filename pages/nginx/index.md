@@ -1,0 +1,187 @@
+# Linux之nginx升级记
+
+> 没有前奏，直接来
+
+## 首先需要查看自己的nginx
+直接要命令行输入如下命令就可以了
+
+````bash
+nginx -v 
+````
+> nginx version: nginx/1.10.0 
+
+这里控制台输出的结果中 1.10.0 就是我们当前 nginx 的版本
+
+## 查看nginx的最新版本
+
+浏览器直接访问 http://nginx.org/en/download.html 就可以看到当前官方的版本，其中 Mainline version 是开发版本，还不太稳定，线上不建议使用；Stable version是最新稳定版，线上建议使用；Legacy versions就是老版本了。
+
+## 下载nginx安装包
+
+我们可以在这里下载自己想要的版本就可以了，可以直接下载后上传到linux机器上，也可以直接在命令行通过 wget https://nginx.org/download/nginx-1.16.0.tar.gz 直接进行下载（这里自己注意相应的版本号），这里文件目录自行选定，我直接放到了根目录下。
+
+## 解压nginx安装包
+
+````bash
+tar -xzf nginx-1.16.0.tar.gz
+````
+ 执行了该命令，就可以将安装包解压出来，当前目录就会多出来一个nginx-1.16.0的目录，然后我们进入该目录。
+
+## 编译安装nginx
+
+> 编译nginx时需要依赖一部分库，后面我们会专门针对报错做出说明，这里先默认所有的依赖我们系统里都已经安装。因为我们这里是升级Nginx不是新安装，那些缺的库我们可能都已经安装过了，这里就不需要一上来就一顿猛装库操作。
+
+我们可以先看一下我们之前编译nginx时的参数，这次升级可就可以用相同的参数就行了。在命令行执行
+
+```bash
+nginx -V
+```
+就可以看到类似以下的输出（注意这里是大写的V）, arguments后面就是参数了，可能会很长，复制下来就好了
+> nginx version: nginx/1.10.0 
+  configure arguments: --prefix=/usr/share/nginx --with-http_sub_module --with-pcre
+
+然后执行 （这里记得先备份一下之前nginx的配置文件就在/etc/nginx 目录）
+
+```bash
+./configure (上面的参数) && make
+```
+
+然后等着执行完成就行了,执行成功后会在 objs 目录下生成 nginx 文件这里执行成功后再查看当前nginx版本，依然是老的版本，不要急，还要进行下面的操作。
+
+## 替换之前的nginx执行文件
+
+先查看nginx的位置，在命令行执行以下操作
+
+````bash
+whereis nginx
+````
+
+> nginx: /usr/sbin/nginx /etc/nginx /usr/lib64/nginx /usr/share/nginx
+
+就可以看到我们的nginx文件在 /usr/sbin/ 目录下，后面几个目录都是配置相关的目录。我们进入 /usr/sbin/ 目录，将老的nginx重新命名为nginx.old。
+
+```bash
+mv nginx nginx.old
+```
+
+然后再将我们刚才objs目录下生成的nginx文件复制到/usr/sbin/ 目录下就好了。
+
+```bash
+cp ./objs/nginx /usr/sbin/
+```
+
+现在再查看一下nginx的版本
+
+```bash
+nginx -v
+```
+
+> nginx version: nginx/1.16.0
+
+现在就可以看到是我们新安装的版本了（这里小写的v就可以了）。
+
+## 启动nginx
+
+我们进入到 /usr/sbin/ 目录，直接执行 nginx就行了
+
+```bash
+cd /usr/sbin/  
+nginx
+```
+
+能正常启动就好了，启动时有可能出现如下错误
+
+```bash
+nginx: [emerg] module "/usr/lib64/nginx/modules/ngx_http_geoip_module.so" version 1010002 instead of 1016000 in /usr/share/nginx/modules/mod-http-geoip.conf:1
+```
+
+这个原因是因为以前nginx modules 和我们新装的modules 不匹配，我们就要先先将旧的modules 卸载安装新版官方的modules，执行如下命令
+
+```bash
+yum remove nginx-module*  
+yum install nginx-module-*
+```
+
+这里删除掉我们之前的nginx的配置文件，我们将之前备份的nginx文件拷过来就好，也可能发发现有些文件找不到比如：
+
+```bash
+> nginx: [emerg] open() "/etc/nginx/mime.types" failed (2: No such file or directory) in /etc/nginx/nginx.conf:31
+```
+
+就是说在/etc/nginx/mime.types文件找不到，如果我们的备份文件里没有，可以去nginx的安装目录/conf/下找找看，找到了复制过来就好了就可以正常启动了。
+
+
+## 编译过程中可能出现的缺包
+
+> /configure: error: the HTTP rewrite module requires the PCRE library.
+
+解决方法：安装pcre
+
+```bash
+yum  install -y pcre pcre-devel
+```
+
+
+> ./configure: error: the HTTP cache module requires md5 functions from OpenSSL library. 
+
+解决方法：安装openssl
+
+````bash
+yum install -y openssl openssl-devel
+````  
+
+
+> ./configure: error: C compiler cc is not found
+
+解决方法：安装gcc-c++
+ 
+ ```bash
+yum install -y gcc-c++ autoconf automake
+ ```
+ 
+ 
+> ./configure: error: the HTTP gzip module requires the zlib library.
+
+解决方法：安装zlib
+
+```bash
+yum install -y zlib-devel
+```
+
+
+> ./configure: error: the HTTP XSLT module requires the libxml2/libxslt libraries.
+
+ 解决方法：安装libxml2 libxml2-dev libxslt-devel
+ 
+```bash
+yum -y install libxml2 libxml2-dev libxslt-devel
+```
+
+
+>  ./configure: error: the HTTP image filter module requires the GD library.
+
+解决方法：安装gd-devel
+
+```bash
+yum -y install gd-devel
+```
+
+
+> ./configure: error: perl module ExtUtils::Embed is required
+
+解决方法：安装perl-devel perl-ExtUtils-Embed
+
+```bash
+ yum -y install perl-devel perl-ExtUtils-Embed
+```
+
+
+> ./configure: error: the GeoIP module requires the GeoIP library.
+
+解决方法：安装GeoIP GeoIP-devel GeoIP-data
+
+```bash
+yum -y install GeoIP GeoIP-devel GeoIP-data
+```
+
+如果还缺少其他的包，直接安装就行了。
