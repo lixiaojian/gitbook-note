@@ -1,0 +1,27 @@
+{
+  "name": "gitbook-generater",
+  "version": "1.0.0",
+  "description": "gitbook的生成器",
+  "main": "index.js",
+  "scripts": {
+    "nginx": "gitbook build ./ ./books/nginx"
+  },
+  "keywords": [
+    "gitbook",
+    "theme",
+    "主题"
+  ],
+  "engines": {
+    "gitbook": ">=3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lixiaojian/gitbook-plugin-theme-lixj.git"
+  },
+  "author": {
+    "name": "lixiaojian",
+    "email": "872458899@qq.com"
+  },
+  "dependencies": {},
+  "license": "ISC"
+}

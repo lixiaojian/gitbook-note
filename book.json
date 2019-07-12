@@ -1,4 +1,6 @@
 {
+  "root": "./pages/nginx",
+  "acrtIndex": "nginx",
   "title": "前端学习笔记",
   "author": "lixiaojian",
   "description": "日常学习笔记整理",
@@ -8,7 +10,8 @@
     "website": "./styles/website.css"
   },
   "structure": {
-    "readme": "index.md"
+    "readme": "index.md",
+    "summary": "SUMMARY.md"
   },
   "plugins": [
     "-sharing",

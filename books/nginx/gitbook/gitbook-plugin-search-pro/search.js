@@ -167,6 +167,7 @@ require([
     }
 
     gitbook.events.on('start', function() {
+        console.log(gitbook.state.config.acrtIndex);
         bindSearch();
         $.getJSON(state.basePath + "/search_plus_index.json").then(function(data) {
             INDEX_DATA = data;
