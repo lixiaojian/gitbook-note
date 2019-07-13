@@ -2,6 +2,7 @@ require([
     'gitbook',
     'jquery'
 ], function(gitbook, $) {
+    var configs;
     var MAX_DESCRIPTION_SIZE = 500;
     var state = gitbook.state;
     var INDEX_DATA = {};
@@ -14,11 +15,10 @@ require([
     var $searchTitle;
     var $searchResultsCount;
     var $searchQuery;
-
+    
     // Throttle search
     function throttle(fn, wait) {
         var timeout;
-
         return function() {
             var ctx = this,
                 args = arguments;
@@ -37,7 +37,6 @@ require([
         $searchTitle = $bookSearchResults.find('.search-results-title');
         $searchResultsCount = $searchTitle.find('.search-results-count');
         $searchQuery = $searchTitle.find('.search-query');
-
         $bookSearchResults.addClass('open');
 
         var noResults = res.count == 0;
@@ -167,9 +166,11 @@ require([
     }
 
     gitbook.events.on('start', function() {
-        console.log(gitbook.state.config.acrtIndex);
+        configs = gitbook.state.config;
         bindSearch();
-        $.getJSON(state.basePath + "/search_plus_index.json").then(function(data) {
+        var fileCategory = configs.pluginsConfig['search-lixj']['fileCategoey'] || 'plus';
+        var fileName = '/search_' + fileCategory + '_index.json';
+        $.getJSON(state.basePath + fileName).then(function(data) {
             INDEX_DATA = data;
             showResult();
             closeSearch();
@@ -206,7 +207,29 @@ require([
         }
     }
 
-    gitbook.events.on('page.change', showResult);
+    gitbook.events.on('page.change', function () {
+        //搜索框
+        var $searchIcon = $("#searchIcon");
+        var $search = $('#book-search-input');
+        var $searchInput = $search.find("input");
+
+        var $pageTitle = $("#page_title");
+        var placeholder = configs.pluginsConfig["theme-lixj"]["search-placeholder"] || "输入关键字搜索"
+        $searchInput.attr("placeholder",placeholder);
+        $searchIcon.click(function(e){
+            $search.fadeIn();
+            $searchIcon.hide();
+            $searchInput.focus();
+            $pageTitle.addClass('hide-4-mb');
+        });
+        $searchInput.blur(function(e) {
+            $search.hide();
+            $searchIcon.fadeIn();
+            $pageTitle.removeClass('hide-4-mb');
+        });
+
+        showResult();
+    });
 
     function getParameterByName(name) {
         var url = window.location.href;

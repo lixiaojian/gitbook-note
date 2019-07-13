@@ -1,6 +1,5 @@
 {
   "root": "./pages/nginx",
-  "acrtIndex": "nginx",
   "title": "前端学习笔记",
   "author": "lixiaojian",
   "description": "日常学习笔记整理",
@@ -53,6 +52,9 @@
     "theme-lixj":{
       "search-placeholder":"输入关键字搜索",
       "search-no-results-title": "没有找到匹配项"
+    },
+    "search-lixj":{
+      "fileCategoey": "nginx"
     }
   }
 }

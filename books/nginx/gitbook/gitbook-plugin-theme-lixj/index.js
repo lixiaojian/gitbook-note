@@ -33,27 +33,6 @@ require(['gitbook', 'jquery'], function(gitbook, $) {
         //标题
         var $title = $(".header-inner .title");
         $title.text(gitbook.state.config.title);
-
-        //搜索框
-        var $searchIcon = $("#searchIcon");
-        var $search = $('#book-search-input');
-        var $searchInput = $search.find("input");
-
-        var $pageTitle = $("#page_title");
-        var placeholder = configs.pluginsConfig["theme-lixj"]["search-placeholder"] || "输入关键字搜索"
-        $searchInput.attr("placeholder",placeholder);
-        $searchIcon.click(function(e){
-            $search.fadeIn();
-            $searchIcon.hide();
-            $searchInput.focus();
-            $pageTitle.addClass('hide-4-mb');
-        });
-        $searchInput.blur(function(e) {
-            $search.hide();
-            $searchIcon.fadeIn();
-            $pageTitle.removeClass('hide-4-mb');
-        });
-
         //去掉gitbook-link
         $(".summary .gitbook-link").hide();
         $(".summary .divider").hide();
